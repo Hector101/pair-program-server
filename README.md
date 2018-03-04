@@ -1,5 +1,7 @@
 # Pair Program Server
 
+## Work In Progress (WIP).
+
 ## Description
 + This is the server side built with Node.js, MongoDB, GraphQL, Socket.io.
 + Features:
