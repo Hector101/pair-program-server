@@ -9,7 +9,7 @@ import { graphqlExpress, graphiqlExpress } from 'apollo-server-express';
 import schema from './schema';
 
 // import mongoose models
-import { Session } from 'models';
+import { Session, User } from './models';
 
 // initialize loading an environment variable
 dotenv.config();
@@ -35,7 +35,8 @@ app.use('/graphql',
   graphqlExpress({
     schema,
     context: {
-      Session
+      Session,
+      User
     }
   })
 );

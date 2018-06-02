@@ -2,18 +2,28 @@ export default `
   type Session {
     _id: String!
     name: String!
-    participants: [String!]
+    sessioncreator: ID!
+    privacy: Boolean!
+    participants: [User]!
+    createdAt: Date!
+  }
+
+  scalar Date
+
+  type SessionResponse {
+    session: Session
+    error: String
   }
 
   type Query {
-    currentSession(id: String!): Session!
-    getAllSession: [Session!]
+    currentSession(id: ID!): Session!
+    getAllSession: [Session!]!
   }
 
   type Mutation {
-    createSession(participants: [String!], name: String!): Session!
-    joinSession(id: String!, name: String!): Session!
-    leaveSession(id: String, name: String!): Session
-    removeSession(id: String!): String!
+    createSession(sessioncreator: ID!, participants: ID!, name: String, privacy: Boolean): Session!
+    joinSession(_id: ID!, userId: String!): SessionResponse!
+    leaveSession(_id: ID!, userId: String!): SessionResponse!
+    removeSession(_id: ID!): String
   }
 `;

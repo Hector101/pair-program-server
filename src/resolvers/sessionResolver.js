@@ -4,57 +4,63 @@ export default {
       const sessions = await Session.find();
       return sessions;
     },
-    async currentSession (parents, { id }, { Session }) {
-      const sessions = await Session.findById(id);
+    async currentSession (parents, { _id }, { Session }) {
+      const sessions = await Session.findById(_id);
       return sessions;
     }
   },
   Mutation: {
+    // createSession
     async createSession (parents, args, { Session }) {
       const newSession = await new Session(args).save();
-      return newSession;
-    },
-    async joinSession (parents, { id, name }, { Session }) {
-      const session = await Session.findByIdAndUpdate(
-        id,
-        {
-          $addToSet: { participants: name }
-        },
-        {
-          new: true,
-          upsert: true,
-          runValidators: true
-        });
+      const { _id } = newSession;
+      const session = Session.findById(_id)
+        .populate('participants');
       return session;
     },
-    async leaveSession (parents, { id, name }, { Session }) {
+    // joinSession
+    async joinSession (parents, { _id, userId }, { Session }) {
       const session = await Session.findByIdAndUpdate(
-        id,
+        _id,
         {
-          $pull: { participants: name }
+          $addToSet: { participants: userId }
         },
         {
           new: true,
-          upsert: true
-        });
-      if (session.participants.length === 0) {
-        await session.remove();
-        const removedSession = {
-          _id: '0000',
-          name: '000',
-          participants: ['000']
+          runValidators: true
+        }).populate('participants');
+      if (!session) {
+        return {
+          error: 'Session not found'
         };
-        return removedSession;
-      } else {
-        return session;
       }
+      return { session };
     },
-    async removeSession (parent, { id }, { Session }) {
-      const session = await Session.findById(id).remove();
-      if (session) {
-        return 'Session successfully removed';
+    // leaveSession
+    async leaveSession (parents, { _id, userId }, { Session }) {
+      const session = await Session.findByIdAndUpdate(
+        _id,
+        {
+          $pull: { participants: userId }
+        },
+        {
+          new: true
+        }).populate('participants');
+      if (!session) {
+        return {
+          error: 'Session not found'
+        };
       }
-      return 'Session didn\'t successfully';
+      return { session };
+    },
+    // removeSession
+    async removeSession (parent, { _id, userId }, { Session, User }) {
+      const session = await Session.findByOne({ _id, sessioncreator: userId });
+      if (!session) {
+        return 'Not authorized to remove session';
+      }
+      session.remove();
+      return 'Session not available';
     }
   }
 };

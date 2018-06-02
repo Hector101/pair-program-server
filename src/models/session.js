@@ -2,18 +2,28 @@ import mongoose, { Schema } from 'mongoose';
 import uniqueValidator from 'mongoose-unique-validator';
 
 function arrayLimit (value) {
-  return value.length >= 1 && value.length <= 5;
+  return value.length >= 1;
 }
 
 const sessionSchema = new Schema({
   name: {
     type: String,
-    unique: true,
-    required: 'session name required'
+    default: 'Untitled Session'
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  sessioncreator: {
+    type: Schema.Types.ObjectId
+  },
+  privacy: {
+    type: Boolean,
+    default: false
   },
   participants: {
-    type: [{ type: String, required: 'invalid name entered' }],
-    validate: [arrayLimit, '{PATH} minimum of 1 and maximum of 5 participants required']
+    type: [{ type: Schema.Types.ObjectId, required: 'No participants', ref: 'User' }],
+    validate: [arrayLimit, '{PATH} minimum of 1 participants required']
   }
 });
 
